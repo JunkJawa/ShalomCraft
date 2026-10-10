@@ -32,13 +32,24 @@ jobs:
           name: shalomcraft-jar
           path: build/libs/*.jar
 
-      - name: Publish latest release
+      - name: Publish releases
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          VERSION=$(grep '^mod_version=' gradle.properties | cut -d= -f2)
+          JAR="build/libs/shalomcraft-${VERSION}.jar"
+          # "latest" always points at the newest build of main
           gh release delete latest --yes --cleanup-tag || true
-          gh release create latest build/libs/shalomcraft-*.jar \
-            --title "ShalomCraft (latest build)" \
-            --notes "Automatic build of the newest commit. Install this jar on the server and on every client." \
+          gh release create latest "$JAR" \
+            --title "ShalomCraft (latest build, v${VERSION})" \
+            --notes "Automatic build of the newest commit, version ${VERSION}. Install this jar on the server and on every client." \
             --target "${{ github.sha }}"
+          # each new version number also gets its own permanent release
+          if ! gh release view "v${VERSION}" > /dev/null 2>&1; then
+            gh release create "v${VERSION}" "$JAR" \
+              --title "ShalomCraft v${VERSION}" \
+              --notes-file CHANGELOG.md \
+              --latest=false \
+              --target "${{ github.sha }}"
+          fi
