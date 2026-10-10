@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "food",
+  "ingredients": [
+    {
+      "item": "shalomcraft:bagel"
+    },
+    {
+      "item": "shalomcraft:lox"
+    }
+  ],
+  "result": {
+    "id": "shalomcraft:bagel_with_lox",
+    "count": 1
+  }
+}

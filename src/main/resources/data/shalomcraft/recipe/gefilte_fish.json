@@ -1,0 +1,27 @@
+{
+  "type": "farmersdelight:cooking",
+  "cookingtime": 200,
+  "experience": 1.0,
+  "ingredients": [
+    {
+      "item": "minecraft:cod"
+    },
+    {
+      "item": "minecraft:egg"
+    },
+    {
+      "item": "farmersdelight:onion"
+    },
+    {
+      "item": "minecraft:carrot"
+    },
+    {
+      "item": "shalomcraft:matzo"
+    }
+  ],
+  "recipe_book_tab": "meals",
+  "result": {
+    "id": "shalomcraft:gefilte_fish",
+    "count": 2
+  }
+}

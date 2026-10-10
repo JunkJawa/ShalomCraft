@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "category": "food",
+  "ingredient": {
+    "item": "shalomcraft:raw_latke"
+  },
+  "result": {
+    "id": "shalomcraft:latke"
+  },
+  "experience": 0.35,
+  "cookingtime": 600
+}

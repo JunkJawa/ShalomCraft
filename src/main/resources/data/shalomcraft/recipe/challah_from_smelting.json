@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smelting",
+  "category": "food",
+  "ingredient": {
+    "item": "shalomcraft:challah_dough"
+  },
+  "result": {
+    "id": "shalomcraft:challah"
+  },
+  "experience": 0.5,
+  "cookingtime": 200
+}

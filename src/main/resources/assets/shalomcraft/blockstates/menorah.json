@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "shalomcraft:block/menorah"
+    },
+    "facing=east": {
+      "model": "shalomcraft:block/menorah",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "shalomcraft:block/menorah",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "shalomcraft:block/menorah",
+      "y": 270
+    }
+  }
+}

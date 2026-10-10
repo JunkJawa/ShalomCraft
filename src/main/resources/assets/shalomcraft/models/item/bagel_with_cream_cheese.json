@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "shalomcraft:item/bagel_with_cream_cheese"
+  }
+}

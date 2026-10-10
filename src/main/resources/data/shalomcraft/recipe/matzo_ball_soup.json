@@ -1,0 +1,30 @@
+{
+  "type": "farmersdelight:cooking",
+  "cookingtime": 200,
+  "experience": 1.0,
+  "ingredients": [
+    {
+      "item": "shalomcraft:matzo"
+    },
+    {
+      "item": "minecraft:egg"
+    },
+    {
+      "item": "minecraft:chicken"
+    },
+    {
+      "item": "minecraft:carrot"
+    },
+    {
+      "item": "farmersdelight:onion"
+    }
+  ],
+  "recipe_book_tab": "meals",
+  "result": {
+    "id": "shalomcraft:matzo_ball_soup",
+    "count": 1
+  },
+  "container": {
+    "id": "minecraft:bowl"
+  }
+}

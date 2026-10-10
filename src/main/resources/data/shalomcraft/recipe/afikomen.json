@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "food",
+  "ingredients": [
+    {
+      "item": "shalomcraft:matzo"
+    },
+    {
+      "item": "shalomcraft:matzo"
+    },
+    {
+      "item": "shalomcraft:matzo"
+    },
+    {
+      "item": "minecraft:honey_bottle"
+    },
+    {
+      "item": "minecraft:paper"
+    }
+  ],
+  "result": {
+    "id": "shalomcraft:afikomen",
+    "count": 1
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smelting",
+  "category": "food",
+  "ingredient": {
+    "item": "farmersdelight:wheat_dough"
+  },
+  "result": {
+    "id": "shalomcraft:matzo"
+  },
+  "experience": 0.35,
+  "cookingtime": 200
+}

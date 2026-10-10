@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "food",
+  "ingredients": [
+    {
+      "item": "shalomcraft:bagel"
+    },
+    {
+      "item": "shalomcraft:cream_cheese"
+    }
+  ],
+  "result": {
+    "id": "shalomcraft:bagel_with_cream_cheese",
+    "count": 1
+  }
+}

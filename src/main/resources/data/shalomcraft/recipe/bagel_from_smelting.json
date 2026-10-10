@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smelting",
+  "category": "food",
+  "ingredient": {
+    "item": "shalomcraft:bagel_dough"
+  },
+  "result": {
+    "id": "shalomcraft:bagel"
+  },
+  "experience": 0.35,
+  "cookingtime": 200
+}
