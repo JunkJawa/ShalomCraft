@@ -1,0 +1,40 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    [
+      {
+        "tag": "c:nuggets/silver"
+      },
+      {
+        "item": "minecraft:iron_nugget"
+      }
+    ],
+    [
+      {
+        "tag": "c:nuggets/silver"
+      },
+      {
+        "item": "minecraft:iron_nugget"
+      }
+    ],
+    [
+      {
+        "tag": "c:nuggets/silver"
+      },
+      {
+        "item": "minecraft:iron_nugget"
+      }
+    ],
+    {
+      "item": "minecraft:paper"
+    },
+    {
+      "item": "minecraft:ink_sac"
+    }
+  ],
+  "result": {
+    "id": "shalomcraft:silver_mezuzah",
+    "count": 1
+  }
+}

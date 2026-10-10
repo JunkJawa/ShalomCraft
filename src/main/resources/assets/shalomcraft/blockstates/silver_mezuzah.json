@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=south,flipped=false": {
+      "model": "shalomcraft:block/silver_mezuzah_a"
+    },
+    "facing=south,flipped=true": {
+      "model": "shalomcraft:block/silver_mezuzah_b"
+    },
+    "facing=west,flipped=false": {
+      "model": "shalomcraft:block/silver_mezuzah_a",
+      "y": 90
+    },
+    "facing=west,flipped=true": {
+      "model": "shalomcraft:block/silver_mezuzah_b",
+      "y": 90
+    },
+    "facing=north,flipped=false": {
+      "model": "shalomcraft:block/silver_mezuzah_a",
+      "y": 180
+    },
+    "facing=north,flipped=true": {
+      "model": "shalomcraft:block/silver_mezuzah_b",
+      "y": 180
+    },
+    "facing=east,flipped=false": {
+      "model": "shalomcraft:block/silver_mezuzah_a",
+      "y": 270
+    },
+    "facing=east,flipped=true": {
+      "model": "shalomcraft:block/silver_mezuzah_b",
+      "y": 270
+    }
+  }
+}

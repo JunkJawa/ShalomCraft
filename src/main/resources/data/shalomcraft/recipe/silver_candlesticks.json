@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "C C",
+    "I I",
+    "III"
+  ],
+  "key": {
+    "C": {
+      "tag": "minecraft:candles"
+    },
+    "I": [
+      {
+        "tag": "c:ingots/silver"
+      },
+      {
+        "item": "minecraft:iron_ingot"
+      }
+    ]
+  },
+  "result": {
+    "id": "shalomcraft:silver_candlesticks",
+    "count": 1
+  }
+}

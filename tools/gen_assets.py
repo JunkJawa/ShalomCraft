@@ -352,35 +352,48 @@ for d in (BANNER_TEX, SHIELD_TEX, PATTERN_DATA, PATTERN_TAG):
 WHITE = (255, 255, 255, 255)
 
 def hexagram(img, ox, oy, W, H, rb_down, rb_up):
-    """Upright hexagram drawn with integer vertices so every edge is a clean 1 pixel line.
-    W and H are the largest x and y index. The up triangle has its base on row rb_up and its apex on
-    row 0, the down triangle has its base on row rb_down and its apex on row H. With an even width
-    the apexes are two pixels wide."""
-    d = ImageDraw.Draw(img); ax = W // 2
+    """Upright hexagram, then thickened with a 2x2 brush so it stays bold and readable once the game
+    blurs it. W and H are the largest x and y index of the thin star; the thick result is one pixel
+    wider and taller, so with an odd W and H the final star has an even size and centres exactly."""
+    thin = Image.new("L", (W + 1, H + 1), 0); d = ImageDraw.Draw(thin); ax = W // 2
     def L(x0, y0, x1, y1):
-        d.line([(ox + x0, oy + y0), (ox + x1, oy + y1)], fill=WHITE, width=1)
-    L(ax, 0, 0, rb_up); L(ax + 1, 0, W, rb_up); L(ax, 0, ax + 1, 0); L(0, rb_up, W, rb_up)
-    L(ax, H, 0, rb_down); L(ax + 1, H, W, rb_down); L(ax, H, ax + 1, H); L(0, rb_down, W, rb_down)
+        d.line([(x0, y0), (x1, y1)], fill=255, width=1)
+    L(ax, 0, 0, rb_up); L(ax, 0, W, rb_up); L(0, rb_up, W, rb_up)
+    L(ax, H, 0, rb_down); L(ax, H, W, rb_down); L(0, rb_down, W, rb_down)
+    px = thin.load(); out = img.load()
+    for y in range(H + 1):
+        for x in range(W + 1):
+            if px[x, y]:
+                for dx in (0, 1):
+                    for dy in (0, 1):
+                        out[ox + x + dx, oy + y + dy] = WHITE
 
 def hstripes(img, ys, w, ox, oy):
     d = ImageDraw.Draw(img)
     for y0, y1 in ys:
         d.rectangle([ox, oy + y0, ox + w - 1, oy + y1], fill=WHITE)
 
+def vstripes(img, xs, h, ox, oy):
+    d = ImageDraw.Draw(img)
+    for x0, x1 in xs:
+        d.rectangle([ox + x0, oy, ox + x1, oy + h - 1], fill=WHITE)
+
 def banner_mask(kind):
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
     for ox in (1, 22):                      # front and back faces of the 20x40 banner
-        if kind == "star": hexagram(img, ox + 4, 1 + 14, 11, 12, 3, 9)
-        else: hstripes(img, [(4, 9), (30, 35)], 20, ox, 1)
+        if kind == "star": hexagram(img, ox + 3, 1 + 13, 12, 12, 2, 10)   # 14x14, centred on (10, 20)
+        elif kind == "stripes": hstripes(img, [(4, 9), (30, 35)], 20, ox, 1)
+        else: vstripes(img, [(0, 1), (18, 19)], 40, ox, 1)
     return img
 
 def shield_mask(kind):
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-    if kind == "star": hexagram(img, 1 + 2, 1 + 7, 7, 8, 2, 6)
-    else: hstripes(img, [(2, 4), (17, 19)], 12, 1, 1)
+    if kind == "star": hexagram(img, 1 + 2, 1 + 7, 6, 6, 2, 4)           # 8x8, centred on (6, 11)
+    elif kind == "stripes": hstripes(img, [(2, 4), (17, 19)], 12, 1, 1)
+    else: vstripes(img, [(0, 1), (10, 11)], 22, 1, 1)
     return img
 
-for kind, name in (("star", "star_of_david"), ("stripes", "israeli_stripes")):
+for kind, name in (("star", "star_of_david"), ("stripes", "israeli_stripes"), ("side", "israeli_side_stripes")):
     banner_mask(kind).save(os.path.join(BANNER_TEX, name + ".png"))
     shield_mask(kind).save(os.path.join(SHIELD_TEX, name + ".png"))
     with open(os.path.join(PATTERN_DATA, name + ".json"), "w") as f:
@@ -463,14 +476,18 @@ paint(a_over, 0, 10, 31, 10, TRIM)              # trim row on the same sides
 
 # tallit: draped over the shoulders, hanging down the front, back and sides to the waist
 faces = [(20, 20, 27, 31), (32, 20, 39, 31), (16, 20, 19, 31), (28, 20, 31, 31)]   # front, back, right, left
+KNOT = (190, 178, 150, 255)
 fill(a_base, 20, 16, 27, 19)                    # shoulders from above
 for x0, y0, x1, y1 in faces:
-    fill(a_base, x0, y0, x1, y1 - 1)            # cloth down to the second last row
-    paint(a_over, x0, y0 + 7, x1, y0 + 7, STRIPE)
-    paint(a_over, x0, y0 + 9, x1, y0 + 9, STRIPE)
-    for x in range(x0, x1 + 1):                 # fringe on the last row
-        if x % 2 == 0: a_over.putpixel((x, y1), THREAD)
-        else: a_base.putpixel((x, y1), weave(x, y1))
+    fill(a_base, x0, y0, x1, y0 + 7)            # cloth hangs eight rows, the hem is row y0+7
+    paint(a_over, x0, y0 + 4, x1, y0 + 4, STRIPE)
+    paint(a_over, x0, y0 + 6, x1, y0 + 6, STRIPE)
+    # tzitzit: knots just under the hem and strands hanging below, at both corners of each face
+    corner_cols = sorted({x0, min(x0 + 1, x1), max(x1 - 1, x0), x1})
+    for x in corner_cols:
+        a_over.putpixel((x, y0 + 8), KNOT)
+        for y in range(y0 + 9, y1 + 1):
+            a_over.putpixel((x, y), THREAD if (x + y) % 2 == 0 else (214, 206, 188, 255))
 # upper arms: a short sleeve of cloth over the shoulder, striped edge
 fill(a_base, 44, 16, 47, 19)
 for x0, x1 in ((40, 43), (44, 47), (48, 51), (52, 55)):
@@ -509,8 +526,8 @@ def tallit_icon():
     base, over = split(i); op = over.load()
     for x in range(3, 13):
         op[x, 8] = STRIPE; op[x, 10] = STRIPE
-    for x in range(3, 13, 2):
-        op[x, 14] = THREAD
+    for x in (3, 4, 11, 12):                    # tassels hanging from the corners
+        op[x, 14] = KNOT; op[x, 15] = THREAD
     return base, over
 
 for name, fn in (("kippah", kippah_icon), ("tallit", tallit_icon)):
@@ -539,3 +556,227 @@ write("tallit", {"type": "minecraft:crafting_shaped", "category": "equipment",
                  "pattern": ["WWW", "WWW", "S S"],
                  "key": {"W": it("minecraft:white_wool"), "S": it("minecraft:string")},
                  "result": result("shalomcraft:tallit", 1)})
+
+# ================= v0.3.0: more banner patterns, candle flames, candlesticks, mezuzah =================
+def outline_pixels(img):
+    """Adds a 1 pixel dark outline around the opaque pixels of a 16x16 sprite."""
+    out = img.copy(); src = img.load(); dst = out.load()
+    for y in range(16):
+        for x in range(16):
+            if src[x, y][3] == 0:
+                for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                    nx, ny = x + dx, y + dy
+                    if 0 <= nx < 16 and 0 <= ny < 16 and src[nx, ny][3]:
+                        dst[x, y] = OUT; break
+    return out
+
+def load_lang():
+    with open(os.path.join(ASSETS, "lang", "en_us.json")) as f: return json.load(f)
+def save_lang(d):
+    with open(os.path.join(ASSETS, "lang", "en_us.json"), "w") as f: json.dump(d, f, indent=2, ensure_ascii=False)
+
+COLORS = ("white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray",
+          "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black")
+
+# --- loom items for the two stripe patterns ---
+lang = load_lang()
+for name, label in (("israeli_stripes", "Israeli Stripes"), ("israeli_side_stripes", "Israeli Side Stripes")):
+    with open(os.path.join(PATTERN_TAG, name + ".json"), "w") as f:
+        json.dump({"values": ["shalomcraft:" + name]}, f, indent=2)
+    icon = canvas(); outline_rect(icon, 2, 1, 13, 14, (246, 240, 222, 255), o=(120, 100, 70, 255))
+    if name == "israeli_stripes":
+        rect(icon, 3, 3, 12, 4, (46, 92, 190, 255)); rect(icon, 3, 11, 12, 12, (46, 92, 190, 255))
+    else:
+        rect(icon, 3, 2, 4, 13, (46, 92, 190, 255)); rect(icon, 11, 2, 12, 13, (46, 92, 190, 255))
+    icon.save(os.path.join(TEX, name + "_banner_pattern.png"))
+    with open(os.path.join(ASSETS, "models", "item", name + "_banner_pattern.json"), "w") as f:
+        json.dump({"parent": "minecraft:item/generated",
+                   "textures": {"layer0": "shalomcraft:item/" + name + "_banner_pattern"}}, f, indent=2)
+    lang[f"item.shalomcraft.{name}_banner_pattern"] = "Banner Pattern"
+    lang[f"item.shalomcraft.{name}_banner_pattern.desc"] = label
+    for color in COLORS:
+        lang[f"block.shalomcraft.banner.{name}.{color}"] = f"{color.replace('_', ' ').title()} {label}"
+    shapeless(name + "_banner_pattern", ["minecraft:paper", "minecraft:blue_dye", "minecraft:blue_dye"],
+              name + "_banner_pattern", 1, "misc")
+
+# --- shared candle flame texture (a static flame, vertical gradient) ---
+fl = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+for y in range(16):
+    c = (255, 244, 170) if y < 4 else ((255, 178, 46) if y < 10 else (232, 96, 24))
+    for x in range(16):
+        fl.putpixel((x, y), c + (255,))
+fl.save(os.path.join(ASSETS, "textures", "block", "candle_flame.png"))
+
+SILVER = [(112, 120, 134), (166, 174, 188), (208, 214, 224), (240, 244, 250)]
+def metal_texture(name, metal):
+    t = Image.new("RGBA", (16, 16))
+    for y in range(16):
+        for x in range(16):
+            pal = metal if x < 8 else candle
+            t.putpixel((x, y), pal[(x + y * 2) % 4 if (x % 8) < 7 else 0] + (255,))
+    for y in range(8, 12):                    # wick region
+        for x in range(0, 4):
+            t.putpixel((x, y), (46, 38, 34, 255) if (x + y) % 3 else (92, 78, 66, 255))
+    t.save(os.path.join(ASSETS, "textures", "block", name + ".png"))
+metal_texture("gold_candlesticks", gold)
+metal_texture("silver_candlesticks", SILVER)
+
+# --- menorah: one flame model per candle, blockstate becomes multipart with a lit_N property per candle ---
+FLAME_UV = [0, 0, 16, 16]
+FLAME_EXTRA = {"shade": False}
+def flame_cube(x, top):
+    face = {"uv": FLAME_UV, "texture": "#f"}
+    return {"from": [x - 0.7, top + 1.0, 7.3], "to": [x + 0.7, top + 3.0, 8.7], "shade": False,
+            "neoforge_data": {"block_light": 15, "sky_light": 15, "ambient_occlusion": False},
+            "faces": {d: dict(face) for d in ("north", "east", "south", "west", "up", "down")}}
+
+def write_model(path, data):
+    with open(os.path.join(ASSETS, "models", "block", path + ".json"), "w") as f: json.dump(data, f, indent=2)
+
+for i in range(9):
+    x = 2 + i * 1.5; top = 11 if i == 4 else 8
+    write_model(f"menorah_flame_{i}", {"textures": {"f": "shalomcraft:block/candle_flame", "particle": "shalomcraft:block/candle_flame"},
+                                       "elements": [flame_cube(x, top)]})
+YROT = {"north": 0, "east": 90, "south": 180, "west": 270}
+def rot(model, facing):
+    d = {"model": model}
+    if YROT[facing]: d["y"] = YROT[facing]
+    return d
+parts = []
+for fc in YROT:
+    parts.append({"when": {"facing": fc}, "apply": rot("shalomcraft:block/menorah", fc)})
+for i in range(9):
+    for fc in YROT:
+        parts.append({"when": {"AND": [{"facing": fc}, {f"lit_{i}": "true"}]},
+                      "apply": rot(f"shalomcraft:block/menorah_flame_{i}", fc)})
+with open(os.path.join(ASSETS, "blockstates", "menorah.json"), "w") as f: json.dump({"multipart": parts}, f, indent=2)
+
+# --- Shabbat candlesticks: gold and silver pairs, two candles lit one at a time ---
+def cube_faces(uv):
+    return {d: {"uv": uv, "texture": "#0"} for d in ("north", "east", "south", "west", "up", "down")}
+
+def candlestick_elements():
+    els = []
+    def add(frm, to, uv):
+        els.append({"from": frm, "to": to, "faces": cube_faces(uv)})
+    for cx in (4.5, 11.5):
+        add([cx - 2.0, 0, 6.0], [cx + 2.0, 1, 10.0], GOLD_UV)       # round foot
+        add([cx - 0.8, 1, 7.2], [cx + 0.8, 5, 8.8], GOLD_UV)         # stem
+        add([cx - 1.6, 5, 6.4], [cx + 1.6, 6, 9.6], GOLD_UV)         # drip cup
+        add([cx - 0.9, 6, 7.1], [cx + 0.9, 12, 8.9], CANDLE_UV)      # candle
+        add([cx - 0.2, 12, 7.8], [cx + 0.2, 13.2, 8.2], WICK_UV)     # wick
+    return els
+for metal in ("gold", "silver"):
+    write_model(f"{metal}_candlesticks", {"parent": "minecraft:block/block",
+                "textures": {"0": f"shalomcraft:block/{metal}_candlesticks", "particle": f"shalomcraft:block/{metal}_candlesticks"},
+                "elements": candlestick_elements()})
+    with open(os.path.join(ASSETS, "models", "item", f"{metal}_candlesticks.json"), "w") as f:
+        json.dump({"parent": f"shalomcraft:block/{metal}_candlesticks"}, f, indent=2)
+    parts = []
+    for fc in YROT:
+        parts.append({"when": {"facing": fc}, "apply": rot(f"shalomcraft:block/{metal}_candlesticks", fc)})
+    for i in range(2):
+        for fc in YROT:
+            parts.append({"when": {"AND": [{"facing": fc}, {f"lit_{i}": "true"}]},
+                          "apply": rot(f"shalomcraft:block/candlestick_flame_{i}", fc)})
+    with open(os.path.join(ASSETS, "blockstates", f"{metal}_candlesticks.json"), "w") as f:
+        json.dump({"multipart": parts}, f, indent=2)
+for i, cx in enumerate((4.5, 11.5)):
+    el = flame_cube(cx, 12)
+    write_model(f"candlestick_flame_{i}", {"textures": {"f": "shalomcraft:block/candle_flame", "particle": "shalomcraft:block/candle_flame"},
+                                           "elements": [el]})
+
+# --- mezuzah: wall mounted case on a slant, gold and silver ---
+GLYPH = (40, 34, 30, 255)
+def mezuzah_texture(name, metal):
+    t = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(8):                                  # plain region for the sides and back, uv 8,0 to 16,8
+        for x in range(8, 16): t.putpixel((x, y), metal[(x + y) % 3 + 1] + (255,))
+    for y in range(12):                                 # front face, 5 wide and 12 tall, uv 0,0 to 5,12
+        for x in range(5):
+            c = metal[0] if y in (0, 1, 10, 11) else (metal[3] if y in (2, 9) else metal[1])
+            t.putpixel((x, y), c + (255,))
+    for y in range(3, 8):                               # shin on the front
+        for x in range(5):
+            if (x % 2 == 0) or y == 7: t.putpixel((x, y), GLYPH)
+    t.save(os.path.join(ASSETS, "textures", "block", name + ".png"))
+    return t
+mez = {"gold": mezuzah_texture("gold_mezuzah", gold), "silver": mezuzah_texture("silver_mezuzah", SILVER)}
+
+def mezuzah_model(metal, angle):
+    plain = [8, 0, 16, 8]
+    f = {"south": {"uv": [0, 0, 5, 12], "texture": "#0"}}
+    for d in ("north", "east", "west", "up", "down"): f[d] = {"uv": plain, "texture": "#0"}
+    return {"textures": {"0": f"shalomcraft:block/{metal}_mezuzah", "particle": f"shalomcraft:block/{metal}_mezuzah"},
+            "elements": [{"from": [5.5, 2, 0], "to": [10.5, 14, 1.4],
+                          "rotation": {"origin": [8, 8, 0.7], "axis": "z", "angle": angle}, "faces": f}]}
+
+# the model has its back on the north side of the block and its face towards south
+MYROT = {"south": 0, "west": 90, "north": 180, "east": 270}
+for metal in ("gold", "silver"):
+    write_model(f"{metal}_mezuzah_a", mezuzah_model(metal, 22.5))
+    write_model(f"{metal}_mezuzah_b", mezuzah_model(metal, -22.5))
+    variants = {}
+    for fc, y in MYROT.items():
+        for flipped, suffix in (("false", "a"), ("true", "b")):
+            v = {"model": f"shalomcraft:block/{metal}_mezuzah_{suffix}"}
+            if y: v["y"] = y
+            variants[f"facing={fc},flipped={flipped}"] = v
+    with open(os.path.join(ASSETS, "blockstates", f"{metal}_mezuzah.json"), "w") as f:
+        json.dump({"variants": variants}, f, indent=2)
+    # inventory sprite: draw the case large, tilt it, shrink it, outline it
+    SS = 8; big = Image.new("RGBA", (16 * SS, 16 * SS), (0, 0, 0, 0)); bd = ImageDraw.Draw(big)
+    cw, ch = 5 * SS, 12 * SS; x0, y0 = (16 * SS - cw) // 2, (16 * SS - ch) // 2
+    pal = gold if metal == "gold" else SILVER
+    for ry in range(12):
+        c = pal[0] if ry in (0, 1, 10, 11) else (pal[3] if ry in (2, 9) else pal[1])
+        bd.rectangle([x0, y0 + ry * SS, x0 + cw - 1, y0 + (ry + 1) * SS - 1], fill=c + (255,))
+    for ry in range(3, 8):
+        for rx in range(5):
+            if rx % 2 == 0 or ry == 7:
+                bd.rectangle([x0 + rx * SS, y0 + ry * SS, x0 + (rx + 1) * SS - 1, y0 + (ry + 1) * SS - 1], fill=GLYPH)
+    big = big.rotate(-22.5, resample=Image.BICUBIC)
+    small = big.resize((16, 16), Image.BOX)
+    sp = small.load()
+    for yy in range(16):
+        for xx in range(16):
+            r, g, b2, a = sp[xx, yy]
+            sp[xx, yy] = (r, g, b2, 255) if a >= 110 else (0, 0, 0, 0)
+    outline_pixels(small).save(os.path.join(TEX, f"{metal}_mezuzah.png"))
+    with open(os.path.join(ASSETS, "models", "item", f"{metal}_mezuzah.json"), "w") as f:
+        json.dump({"parent": "minecraft:item/generated", "textures": {"layer0": f"shalomcraft:item/{metal}_mezuzah"}}, f, indent=2)
+
+# --- loot tables, mining tag, lighters tag ---
+for block in ("gold_candlesticks", "silver_candlesticks", "gold_mezuzah", "silver_mezuzah"):
+    with open(os.path.join(LOOT, block + ".json"), "w") as f:
+        json.dump({"type": "minecraft:block", "random_sequence": "shalomcraft:blocks/" + block,
+                   "pools": [{"rolls": 1.0, "bonus_rolls": 0.0,
+                              "conditions": [{"condition": "minecraft:survives_explosion"}],
+                              "entries": [{"type": "minecraft:item", "name": "shalomcraft:" + block}]}]}, f, indent=2)
+with open(os.path.join(TAGS, "pickaxe.json"), "w") as f:
+    json.dump({"replace": False, "values": ["shalomcraft:menorah", "shalomcraft:gold_candlesticks",
+              "shalomcraft:silver_candlesticks", "shalomcraft:gold_mezuzah", "shalomcraft:silver_mezuzah"]}, f, indent=2)
+ITEM_TAGS = os.path.join(ROOT, "data", "shalomcraft", "tags", "item"); os.makedirs(ITEM_TAGS, exist_ok=True)
+with open(os.path.join(ITEM_TAGS, "candle_lighters.json"), "w") as f:
+    json.dump({"replace": False, "values": ["minecraft:flint_and_steel", "minecraft:fire_charge"]}, f, indent=2)
+
+# --- lang and recipes ---
+for k, v in (("gold_candlesticks", "Gold Shabbat Candlesticks"), ("silver_candlesticks", "Silver Shabbat Candlesticks"),
+             ("gold_mezuzah", "Gold Mezuzah"), ("silver_mezuzah", "Silver Mezuzah")):
+    lang["block.shalomcraft." + k] = v
+save_lang(lang)
+
+SILVER_INGOT = [{"tag": "c:ingots/silver"}, {"item": "minecraft:iron_ingot"}]
+SILVER_NUGGET = [{"tag": "c:nuggets/silver"}, {"item": "minecraft:iron_nugget"}]
+write("gold_candlesticks", {"type": "minecraft:crafting_shaped", "category": "misc",
+      "pattern": ["C C", "I I", "III"], "key": {"C": {"tag": "minecraft:candles"}, "I": it("minecraft:gold_ingot")},
+      "result": result("shalomcraft:gold_candlesticks", 1)})
+write("silver_candlesticks", {"type": "minecraft:crafting_shaped", "category": "misc",
+      "pattern": ["C C", "I I", "III"], "key": {"C": {"tag": "minecraft:candles"}, "I": SILVER_INGOT},
+      "result": result("shalomcraft:silver_candlesticks", 1)})
+write("gold_mezuzah", {"type": "minecraft:crafting_shapeless", "category": "misc",
+      "ingredients": [it("minecraft:gold_nugget")] * 3 + [it("minecraft:paper"), it("minecraft:ink_sac")],
+      "result": result("shalomcraft:gold_mezuzah", 1)})
+write("silver_mezuzah", {"type": "minecraft:crafting_shapeless", "category": "misc",
+      "ingredients": [SILVER_NUGGET] * 3 + [it("minecraft:paper"), it("minecraft:ink_sac")],
+      "result": result("shalomcraft:silver_mezuzah", 1)})

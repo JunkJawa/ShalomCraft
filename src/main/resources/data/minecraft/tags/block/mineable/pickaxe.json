@@ -1,6 +1,10 @@
 {
   "replace": false,
   "values": [
-    "shalomcraft:menorah"
+    "shalomcraft:menorah",
+    "shalomcraft:gold_candlesticks",
+    "shalomcraft:silver_candlesticks",
+    "shalomcraft:gold_mezuzah",
+    "shalomcraft:silver_mezuzah"
   ]
 }

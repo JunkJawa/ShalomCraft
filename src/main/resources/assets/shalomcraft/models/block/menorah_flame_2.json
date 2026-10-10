@@ -1,0 +1,82 @@
+{
+  "textures": {
+    "f": "shalomcraft:block/candle_flame",
+    "particle": "shalomcraft:block/candle_flame"
+  },
+  "elements": [
+    {
+      "from": [
+        4.3,
+        9.0,
+        7.3
+      ],
+      "to": [
+        5.7,
+        11.0,
+        8.7
+      ],
+      "shade": false,
+      "neoforge_data": {
+        "block_light": 15,
+        "sky_light": 15,
+        "ambient_occlusion": false
+      },
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#f"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#f"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#f"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#f"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#f"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#f"
+        }
+      }
+    }
+  ]
+}

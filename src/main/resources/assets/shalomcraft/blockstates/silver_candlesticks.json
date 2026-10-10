@@ -1,0 +1,165 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north"
+      },
+      "apply": {
+        "model": "shalomcraft:block/silver_candlesticks"
+      }
+    },
+    {
+      "when": {
+        "facing": "east"
+      },
+      "apply": {
+        "model": "shalomcraft:block/silver_candlesticks",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south"
+      },
+      "apply": {
+        "model": "shalomcraft:block/silver_candlesticks",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west"
+      },
+      "apply": {
+        "model": "shalomcraft:block/silver_candlesticks",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "lit_0": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/candlestick_flame_0"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "lit_0": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/candlestick_flame_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "lit_0": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/candlestick_flame_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "lit_0": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/candlestick_flame_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "lit_1": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/candlestick_flame_1"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "lit_1": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/candlestick_flame_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "lit_1": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/candlestick_flame_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "lit_1": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/candlestick_flame_1",
+        "y": 270
+      }
+    }
+  ]
+}

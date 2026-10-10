@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "shalomcraft:item/israeli_side_stripes_banner_pattern"
+  }
+}

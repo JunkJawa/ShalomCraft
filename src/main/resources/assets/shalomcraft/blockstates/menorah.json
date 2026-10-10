@@ -1,19 +1,606 @@
 {
-  "variants": {
-    "facing=north": {
-      "model": "shalomcraft:block/menorah"
+  "multipart": [
+    {
+      "when": {
+        "facing": "north"
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah"
+      }
     },
-    "facing=east": {
-      "model": "shalomcraft:block/menorah",
-      "y": 90
+    {
+      "when": {
+        "facing": "east"
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah",
+        "y": 90
+      }
     },
-    "facing=south": {
-      "model": "shalomcraft:block/menorah",
-      "y": 180
+    {
+      "when": {
+        "facing": "south"
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah",
+        "y": 180
+      }
     },
-    "facing=west": {
-      "model": "shalomcraft:block/menorah",
-      "y": 270
+    {
+      "when": {
+        "facing": "west"
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "lit_0": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_0"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "lit_0": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "lit_0": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "lit_0": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "lit_1": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_1"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "lit_1": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "lit_1": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "lit_1": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "lit_2": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_2"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "lit_2": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "lit_2": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "lit_2": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "lit_3": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_3"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "lit_3": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "lit_3": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "lit_3": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "lit_4": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_4"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "lit_4": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_4",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "lit_4": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_4",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "lit_4": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_4",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "lit_5": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_5"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "lit_5": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_5",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "lit_5": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_5",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "lit_5": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_5",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "lit_6": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_6"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "lit_6": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_6",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "lit_6": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_6",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "lit_6": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_6",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "lit_7": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_7"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "lit_7": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_7",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "lit_7": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_7",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "lit_7": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_7",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "north"
+          },
+          {
+            "lit_8": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_8"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "east"
+          },
+          {
+            "lit_8": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_8",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "south"
+          },
+          {
+            "lit_8": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_8",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "facing": "west"
+          },
+          {
+            "lit_8": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "shalomcraft:block/menorah_flame_8",
+        "y": 270
+      }
     }
-  }
+  ]
 }

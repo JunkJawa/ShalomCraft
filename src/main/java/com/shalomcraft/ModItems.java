@@ -112,6 +112,25 @@ public class ModItems {
                             ResourceLocation.fromNamespaceAndPath(ShalomCraft.MODID, "pattern_item/star_of_david")),
                     new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
 
+    public static final DeferredItem<Item> ISRAELI_STRIPES_BANNER_PATTERN = ITEMS.register("israeli_stripes_banner_pattern",
+            () -> new BannerPatternItem(
+                    TagKey.create(Registries.BANNER_PATTERN,
+                            ResourceLocation.fromNamespaceAndPath(ShalomCraft.MODID, "pattern_item/israeli_stripes")),
+                    new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
+    public static final DeferredItem<Item> ISRAELI_SIDE_STRIPES_BANNER_PATTERN = ITEMS.register("israeli_side_stripes_banner_pattern",
+            () -> new BannerPatternItem(
+                    TagKey.create(Registries.BANNER_PATTERN,
+                            ResourceLocation.fromNamespaceAndPath(ShalomCraft.MODID, "pattern_item/israeli_side_stripes")),
+                    new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
+
     // Blocks
     public static final DeferredItem<BlockItem> MENORAH = ITEMS.registerSimpleBlockItem("menorah", ModBlocks.MENORAH);
+    public static final DeferredItem<BlockItem> GOLD_CANDLESTICKS =
+            ITEMS.registerSimpleBlockItem("gold_candlesticks", ModBlocks.GOLD_CANDLESTICKS);
+    public static final DeferredItem<BlockItem> SILVER_CANDLESTICKS =
+            ITEMS.registerSimpleBlockItem("silver_candlesticks", ModBlocks.SILVER_CANDLESTICKS);
+    public static final DeferredItem<BlockItem> GOLD_MEZUZAH =
+            ITEMS.registerSimpleBlockItem("gold_mezuzah", ModBlocks.GOLD_MEZUZAH);
+    public static final DeferredItem<BlockItem> SILVER_MEZUZAH =
+            ITEMS.registerSimpleBlockItem("silver_mezuzah", ModBlocks.SILVER_MEZUZAH);
 }
