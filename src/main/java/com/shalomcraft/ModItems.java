@@ -7,6 +7,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BannerPatternItem;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.effect.MobEffect;
@@ -97,6 +98,12 @@ public class ModItems {
     public static final DeferredItem<Item> BAGEL_WITH_LOX_AND_CREAM_CHEESE =
             edible("bagel_with_lox_and_cream_cheese", food(11, 0.85f)
                     .effect(fdEffect("nourishment", 2400, MobEffects.SATURATION), 1.0f));
+
+    // Worn items: dyeable, no protection
+    public static final DeferredItem<Item> KIPPAH = ITEMS.register("kippah",
+            () -> new ArmorItem(ModArmorMaterials.CLOTH, ArmorItem.Type.HELMET, new Item.Properties().stacksTo(1)));
+    public static final DeferredItem<Item> TALLIT = ITEMS.register("tallit",
+            () -> new ArmorItem(ModArmorMaterials.CLOTH, ArmorItem.Type.CHESTPLATE, new Item.Properties().stacksTo(1)));
 
     // Banner pattern for the loom
     public static final DeferredItem<Item> STAR_OF_DAVID_BANNER_PATTERN = ITEMS.register("star_of_david_banner_pattern",

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "shalomcraft:item/kippah",
+    "layer1": "shalomcraft:item/kippah_overlay"
+  }
+}

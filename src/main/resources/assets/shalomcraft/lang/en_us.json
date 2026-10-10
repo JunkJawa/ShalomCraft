@@ -52,5 +52,7 @@
   "block.shalomcraft.banner.star_of_david.red": "Red Star of David",
   "block.shalomcraft.banner.israeli_stripes.red": "Red Israeli Stripes",
   "block.shalomcraft.banner.star_of_david.black": "Black Star of David",
-  "block.shalomcraft.banner.israeli_stripes.black": "Black Israeli Stripes"
+  "block.shalomcraft.banner.israeli_stripes.black": "Black Israeli Stripes",
+  "item.shalomcraft.kippah": "Kippah",
+  "item.shalomcraft.tallit": "Tallit"
 }

@@ -427,3 +427,115 @@ write("israeli_flag_banner", {
             {"pattern": "shalomcraft:israeli_stripes", "color": "blue"},
             {"pattern": "shalomcraft:star_of_david", "color": "blue"}],
         "minecraft:item_name": '{"text":"Israeli Flag"}'}}})
+
+# ---------- kippah and tallit: dyeable worn cloth ----------
+ARMOR_TEX = os.path.join(ASSETS, "textures", "models", "armor")
+DYE_TAG = os.path.join(ROOT, "data", "minecraft", "tags", "item")
+os.makedirs(ARMOR_TEX, exist_ok=True); os.makedirs(DYE_TAG, exist_ok=True)
+CLEAR = (0, 0, 0, 0)
+TRIM = (206, 164, 62, 255)
+STRIPE = (34, 56, 128, 255)
+THREAD = (232, 226, 212, 255)
+
+def weave(x, y):
+    v = 236 + ((x * 7 + y * 13) % 5) - 2           # neutral light grey so any dye reads true
+    return (v, v, v, 255)
+
+def fill(img, x0, y0, x1, y1):
+    px = img.load()
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            px[x, y] = weave(x, y)
+
+def paint(img, x0, y0, x1, y1, c):
+    px = img.load()
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            px[x, y] = c
+
+# 64x32 armor layer, shared by both items: head area for the kippah, body and arm area for the tallit
+a_base = Image.new("RGBA", (64, 32), CLEAR); a_over = Image.new("RGBA", (64, 32), CLEAR)
+
+# kippah: top of the head plus a three pixel band around the crown, gold trim on the lowest row
+fill(a_base, 8, 0, 15, 7)                       # top
+fill(a_base, 0, 8, 31, 9)                       # right, front, left, back sides, upper two rows
+paint(a_over, 0, 10, 31, 10, TRIM)              # trim row on the same sides
+
+# tallit: draped over the shoulders, hanging down the front, back and sides to the waist
+faces = [(20, 20, 27, 31), (32, 20, 39, 31), (16, 20, 19, 31), (28, 20, 31, 31)]   # front, back, right, left
+fill(a_base, 20, 16, 27, 19)                    # shoulders from above
+for x0, y0, x1, y1 in faces:
+    fill(a_base, x0, y0, x1, y1 - 1)            # cloth down to the second last row
+    paint(a_over, x0, y0 + 7, x1, y0 + 7, STRIPE)
+    paint(a_over, x0, y0 + 9, x1, y0 + 9, STRIPE)
+    for x in range(x0, x1 + 1):                 # fringe on the last row
+        if x % 2 == 0: a_over.putpixel((x, y1), THREAD)
+        else: a_base.putpixel((x, y1), weave(x, y1))
+# upper arms: a short sleeve of cloth over the shoulder, striped edge
+fill(a_base, 44, 16, 47, 19)
+for x0, x1 in ((40, 43), (44, 47), (48, 51), (52, 55)):
+    fill(a_base, x0, 20, x1, 22)
+    paint(a_over, x0, 22, x1, 22, STRIPE)
+a_base.save(os.path.join(ARMOR_TEX, "cloth_layer_1.png"))
+a_over.save(os.path.join(ARMOR_TEX, "cloth_layer_1_overlay.png"))
+# layer 2 is only requested for leggings, written empty so a missing file never shows up in logs
+Image.new("RGBA", (64, 32), CLEAR).save(os.path.join(ARMOR_TEX, "cloth_layer_2.png"))
+Image.new("RGBA", (64, 32), CLEAR).save(os.path.join(ARMOR_TEX, "cloth_layer_2_overlay.png"))
+
+def split(img):
+    """Moves the dark outline into an overlay layer so dye never tints it."""
+    base = img.copy(); over = canvas(); bp = base.load(); op = over.load()
+    for y in range(16):
+        for x in range(16):
+            if bp[x, y] == OUT:
+                op[x, y] = OUT; bp[x, y] = CLEAR
+    return base, over
+
+def kippah_icon():
+    i = canvas(); blob(i, 8, 11, 6.6, 5.6, (238, 238, 242, 255))
+    px = i.load()
+    for y in range(12, 16):
+        for x in range(16): px[x, y] = CLEAR
+    base, over = split(i); bp = base.load(); op = over.load()
+    for x in range(16):
+        if bp[x, 11][3]:
+            op[x, 11] = TRIM; bp[x, 11] = CLEAR
+    for x in range(16):
+        if op[x, 11][3]: op[x, 12] = OUT
+    return base, over
+
+def tallit_icon():
+    i = canvas(); outline_rect(i, 2, 2, 13, 13, (238, 238, 242, 255))
+    base, over = split(i); op = over.load()
+    for x in range(3, 13):
+        op[x, 8] = STRIPE; op[x, 10] = STRIPE
+    for x in range(3, 13, 2):
+        op[x, 14] = THREAD
+    return base, over
+
+for name, fn in (("kippah", kippah_icon), ("tallit", tallit_icon)):
+    base, over = fn()
+    base.save(os.path.join(TEX, name + ".png")); over.save(os.path.join(TEX, name + "_overlay.png"))
+    with open(os.path.join(ASSETS, "models", "item", name + ".json"), "w") as f:
+        json.dump({"parent": "minecraft:item/generated",
+                   "textures": {"layer0": "shalomcraft:item/" + name,
+                                "layer1": "shalomcraft:item/" + name + "_overlay"}}, f, indent=2)
+
+# allow dyeing in a crafting grid with any dye, same as leather armor
+with open(os.path.join(DYE_TAG, "dyeable.json"), "w") as f:
+    json.dump({"replace": False, "values": ["shalomcraft:kippah", "shalomcraft:tallit"]}, f, indent=2)
+
+with open(os.path.join(ASSETS, "lang", "en_us.json")) as f:
+    lang = json.load(f)
+lang["item.shalomcraft.kippah"] = "Kippah"
+lang["item.shalomcraft.tallit"] = "Tallit"
+with open(os.path.join(ASSETS, "lang", "en_us.json"), "w") as f:
+    json.dump(lang, f, indent=2, ensure_ascii=False)
+
+write("kippah", {"type": "minecraft:crafting_shaped", "category": "equipment",
+                 "pattern": ["WW"], "key": {"W": it("minecraft:white_wool")},
+                 "result": result("shalomcraft:kippah", 1)})
+write("tallit", {"type": "minecraft:crafting_shaped", "category": "equipment",
+                 "pattern": ["WWW", "WWW", "S S"],
+                 "key": {"W": it("minecraft:white_wool"), "S": it("minecraft:string")},
+                 "result": result("shalomcraft:tallit", 1)})

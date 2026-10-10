@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "shalomcraft:item/tallit",
+    "layer1": "shalomcraft:item/tallit_overlay"
+  }
+}

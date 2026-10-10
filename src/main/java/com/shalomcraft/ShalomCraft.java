@@ -9,6 +9,7 @@ public class ShalomCraft {
 
     public ShalomCraft(IEventBus modBus) {
         ModBlocks.BLOCKS.register(modBus);
+        ModArmorMaterials.MATERIALS.register(modBus);
         ModItems.ITEMS.register(modBus);
         ModCreativeTabs.TABS.register(modBus);
     }
