@@ -207,6 +207,10 @@ for y in range(16):
         pal = gold if x < 8 else candle
         idx = (x + y * 2) % 4 if (x % 8) < 7 else 0
         b.putpixel((x, y), pal[idx] + (255,))
+# wick region (uv 0,8 to 4,12): dark wick with a slightly lighter core
+for y in range(8, 12):
+    for x in range(0, 4):
+        b.putpixel((x, y), (46, 38, 34, 255) if (x + y) % 3 else (92, 78, 66, 255))
 b.save(os.path.join(ASSETS, "textures", "block", "menorah.png"))
 
 # ---------- item models ----------
@@ -218,7 +222,7 @@ with open(os.path.join(ASSETS, "models", "item", "menorah.json"), "w") as f:
     json.dump({"parent": "shalomcraft:block/menorah"}, f, indent=2)
 
 # ---------- menorah block model ----------
-GOLD_UV, CANDLE_UV = [0, 0, 8, 8], [8, 0, 16, 8]
+GOLD_UV, CANDLE_UV, WICK_UV = [0, 0, 8, 8], [8, 0, 16, 8], [0, 8, 4, 12]
 def faces(uv):
     return {d: {"uv": uv, "texture": "#0"} for d in ("north", "east", "south", "west", "up", "down")}
 
@@ -227,15 +231,17 @@ def cube(frm, to, uv):
     els.append({"from": frm, "to": to, "faces": faces(uv)})
 
 cube([1, 0, 6], [15, 1, 10], GOLD_UV)       # base
-cube([7, 1, 7], [9, 3, 9], GOLD_UV)         # stem
-cube([1, 3, 7], [15, 4, 9], GOLD_UV)        # arm bar
+cube([7, 1, 7], [9, 3, 9], GOLD_UV)         # stem, centred on x=8
+cube([1, 3, 7], [15, 4, 9], GOLD_UV)        # arm bar, centred on x=8
 for i in range(9):
-    x = 1 + i * 1.5
-    top = 11 if i == 4 else 8
-    cube([x - 0.5, 4, 7.5], [x + 0.5, top, 8.5], CANDLE_UV)
-    cube([x - 0.7, 3, 7.3], [x + 0.7, 4.6, 8.7], GOLD_UV)   # cup
+    x = 2 + i * 1.5                          # nine candles from x=2 to x=14, centred on x=8, all over the base
+    top = 11 if i == 4 else 8                # the shamash (centre) stands taller
+    cube([x - 0.7, 3, 7.3], [x + 0.7, 4.6, 8.7], GOLD_UV)       # cup
+    cube([x - 0.5, 4, 7.5], [x + 0.5, top, 8.5], CANDLE_UV)     # candle
+    cube([x - 0.2, top, 7.8], [x + 0.2, top + 1.2, 8.2], WICK_UV)  # wick
 with open(os.path.join(ASSETS, "models", "block", "menorah.json"), "w") as f:
-    json.dump({"textures": {"0": "shalomcraft:block/menorah", "particle": "shalomcraft:block/menorah"},
+    json.dump({"parent": "minecraft:block/block",
+               "textures": {"0": "shalomcraft:block/menorah", "particle": "shalomcraft:block/menorah"},
                "elements": els}, f, indent=2)
 
 with open(os.path.join(ASSETS, "blockstates", "menorah.json"), "w") as f:
@@ -333,3 +339,91 @@ with open(os.path.join(LOOT, "menorah.json"), "w") as f:
                           "entries": [{"type": "minecraft:item", "name": "shalomcraft:menorah"}]}]}, f, indent=2)
 with open(os.path.join(TAGS, "pickaxe.json"), "w") as f:
     json.dump({"replace": False, "values": ["shalomcraft:menorah"]}, f, indent=2)
+
+# ---------- banner patterns: Star of David and Israeli side stripes ----------
+from PIL import ImageDraw
+BANNER_TEX = os.path.join(ASSETS, "textures", "entity", "banner")
+SHIELD_TEX = os.path.join(ASSETS, "textures", "entity", "shield")
+PATTERN_DATA = os.path.join(ROOT, "data", "shalomcraft", "banner_pattern")
+PATTERN_TAG = os.path.join(ROOT, "data", "shalomcraft", "tags", "banner_pattern", "pattern_item")
+for d in (BANNER_TEX, SHIELD_TEX, PATTERN_DATA, PATTERN_TAG):
+    os.makedirs(d, exist_ok=True)
+
+WHITE = (255, 255, 255, 255)
+
+def hexagram(img, ox, oy, W, H, rb_down, rb_up):
+    """Upright hexagram drawn with integer vertices so every edge is a clean 1 pixel line.
+    W and H are the largest x and y index. The up triangle has its base on row rb_up and its apex on
+    row 0, the down triangle has its base on row rb_down and its apex on row H. With an even width
+    the apexes are two pixels wide."""
+    d = ImageDraw.Draw(img); ax = W // 2
+    def L(x0, y0, x1, y1):
+        d.line([(ox + x0, oy + y0), (ox + x1, oy + y1)], fill=WHITE, width=1)
+    L(ax, 0, 0, rb_up); L(ax + 1, 0, W, rb_up); L(ax, 0, ax + 1, 0); L(0, rb_up, W, rb_up)
+    L(ax, H, 0, rb_down); L(ax + 1, H, W, rb_down); L(ax, H, ax + 1, H); L(0, rb_down, W, rb_down)
+
+def hstripes(img, ys, w, ox, oy):
+    d = ImageDraw.Draw(img)
+    for y0, y1 in ys:
+        d.rectangle([ox, oy + y0, ox + w - 1, oy + y1], fill=WHITE)
+
+def banner_mask(kind):
+    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    for ox in (1, 22):                      # front and back faces of the 20x40 banner
+        if kind == "star": hexagram(img, ox + 4, 1 + 14, 11, 12, 3, 9)
+        else: hstripes(img, [(4, 9), (30, 35)], 20, ox, 1)
+    return img
+
+def shield_mask(kind):
+    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    if kind == "star": hexagram(img, 1 + 2, 1 + 7, 7, 8, 2, 6)
+    else: hstripes(img, [(2, 4), (17, 19)], 12, 1, 1)
+    return img
+
+for kind, name in (("star", "star_of_david"), ("stripes", "israeli_stripes")):
+    banner_mask(kind).save(os.path.join(BANNER_TEX, name + ".png"))
+    shield_mask(kind).save(os.path.join(SHIELD_TEX, name + ".png"))
+    with open(os.path.join(PATTERN_DATA, name + ".json"), "w") as f:
+        json.dump({"asset_id": "shalomcraft:" + name,
+                   "translation_key": "block.shalomcraft.banner." + name}, f, indent=2)
+
+# the loom item for the star (the stripes only exist inside the flag recipe)
+with open(os.path.join(PATTERN_TAG, "star_of_david.json"), "w") as f:
+    json.dump({"values": ["shalomcraft:star_of_david"]}, f, indent=2)
+
+icon = canvas(); outline_rect(icon, 2, 1, 13, 14, (246, 240, 222, 255), o=(120, 100, 70, 255))
+ic = ImageDraw.Draw(icon)
+for a0 in (0, 60):
+    pts = [(7.5 + 4.2 * math.cos(math.radians(a0 + 90 + k * 120)),
+            7.5 + 4.2 * math.sin(math.radians(a0 + 90 + k * 120))) for k in range(3)]
+    for k in range(3):
+        ic.line([pts[k], pts[(k + 1) % 3]], fill=(46, 92, 190, 255), width=1)
+icon.save(os.path.join(TEX, "star_of_david_banner_pattern.png"))
+with open(os.path.join(ASSETS, "models", "item", "star_of_david_banner_pattern.json"), "w") as f:
+    json.dump({"parent": "minecraft:item/generated",
+               "textures": {"layer0": "shalomcraft:item/star_of_david_banner_pattern"}}, f, indent=2)
+
+# language: item, hover text and a name for every banner colour
+with open(os.path.join(ASSETS, "lang", "en_us.json")) as f:
+    lang = json.load(f)
+lang["item.shalomcraft.star_of_david_banner_pattern"] = "Banner Pattern"
+lang["item.shalomcraft.star_of_david_banner_pattern.desc"] = "Star of David"
+for color in ("white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray",
+              "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"):
+    nice = color.replace("_", " ").title()
+    lang[f"block.shalomcraft.banner.star_of_david.{color}"] = f"{nice} Star of David"
+    lang[f"block.shalomcraft.banner.israeli_stripes.{color}"] = f"{nice} Israeli Stripes"
+with open(os.path.join(ASSETS, "lang", "en_us.json"), "w") as f:
+    json.dump(lang, f, indent=2, ensure_ascii=False)
+
+# recipes: the pattern item, and a ready made Israeli flag banner
+shapeless("star_of_david_banner_pattern", ["minecraft:paper", "minecraft:blue_dye", "minecraft:gold_nugget"],
+          "star_of_david_banner_pattern", 1, "misc")
+write("israeli_flag_banner", {
+    "type": "minecraft:crafting_shapeless", "category": "misc",
+    "ingredients": [it("minecraft:white_banner"), it("minecraft:blue_dye"), it("minecraft:blue_dye")],
+    "result": {"id": "minecraft:white_banner", "count": 1, "components": {
+        "minecraft:banner_patterns": [
+            {"pattern": "shalomcraft:israeli_stripes", "color": "blue"},
+            {"pattern": "shalomcraft:star_of_david", "color": "blue"}],
+        "minecraft:item_name": '{"text":"Israeli Flag"}'}}})

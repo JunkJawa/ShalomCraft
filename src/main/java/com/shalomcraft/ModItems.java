@@ -4,7 +4,11 @@ import java.util.function.Supplier;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.BannerPatternItem;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -93,6 +97,13 @@ public class ModItems {
     public static final DeferredItem<Item> BAGEL_WITH_LOX_AND_CREAM_CHEESE =
             edible("bagel_with_lox_and_cream_cheese", food(11, 0.85f)
                     .effect(fdEffect("nourishment", 2400, MobEffects.SATURATION), 1.0f));
+
+    // Banner pattern for the loom
+    public static final DeferredItem<Item> STAR_OF_DAVID_BANNER_PATTERN = ITEMS.register("star_of_david_banner_pattern",
+            () -> new BannerPatternItem(
+                    TagKey.create(Registries.BANNER_PATTERN,
+                            ResourceLocation.fromNamespaceAndPath(ShalomCraft.MODID, "pattern_item/star_of_david")),
+                    new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
 
     // Blocks
     public static final DeferredItem<BlockItem> MENORAH = ITEMS.registerSimpleBlockItem("menorah", ModBlocks.MENORAH);
