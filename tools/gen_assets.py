@@ -454,11 +454,15 @@ def weave(x, y):
     v = 236 + ((x * 7 + y * 13) % 5) - 2           # neutral light grey so any dye reads true
     return (v, v, v, 255)
 
-def fill(img, x0, y0, x1, y1):
+def fill(img, x0, y0, x1, y1, pleats=False):
     px = img.load()
     for y in range(y0, y1 + 1):
         for x in range(x0, x1 + 1):
-            px[x, y] = weave(x, y)
+            r, g, b, a = weave(x, y)
+            if pleats:                                   # soft folds so the cloth hangs instead of looking flat
+                d = {0: -3, 1: 0, 2: -16, 3: -6}[(x - x0) % 4] if x1 - x0 >= 3 else 0
+                r += d; g += d; b += d
+            px[x, y] = (r, g, b, 255)
 
 def paint(img, x0, y0, x1, y1, c):
     px = img.load()
@@ -471,17 +475,25 @@ a_base = Image.new("RGBA", (64, 32), CLEAR); a_over = Image.new("RGBA", (64, 32)
 
 # kippah: top of the head plus a three pixel band around the crown, gold trim on the lowest row
 fill(a_base, 8, 0, 15, 7)                       # top
+for k in range(8):                              # knitted crown: a ring of darker stitches that closes to the centre
+    for (x, y) in ((8 + k, 0), (8 + k, 7), (8, k), (15, k)):
+        r, g, b, a = a_base.getpixel((x, y)); a_base.putpixel((x, y), (r - 10, g - 10, b - 10, a))
+paint(a_over, 11, 3, 12, 4, TRIM)               # little gold button at the very top
 fill(a_base, 0, 8, 31, 9)                       # right, front, left, back sides, upper two rows
 paint(a_over, 0, 10, 31, 10, TRIM)              # trim row on the same sides
+for x in range(0, 32, 2):                       # tiny shadow dots under the trim so the rim has depth
+    a_over.putpixel((x, 11), (0, 0, 0, 70))
 
 # tallit: draped over the shoulders, hanging down the front, back and sides to the waist
 faces = [(20, 20, 27, 31), (32, 20, 39, 31), (16, 20, 19, 31), (28, 20, 31, 31)]   # front, back, right, left
 KNOT = (190, 178, 150, 255)
 fill(a_base, 20, 16, 27, 19)                    # shoulders from above
 for x0, y0, x1, y1 in faces:
-    fill(a_base, x0, y0, x1, y0 + 7)            # cloth hangs eight rows, the hem is row y0+7
+    fill(a_base, x0, y0, x1, y0 + 7, pleats=True)   # cloth hangs eight rows, the hem is row y0+7
+    paint(a_over, x0, y0 + 3, x1, y0 + 3, STRIPE)   # one wide band over a thin one, like a real tallit
     paint(a_over, x0, y0 + 4, x1, y0 + 4, STRIPE)
     paint(a_over, x0, y0 + 6, x1, y0 + 6, STRIPE)
+    paint(a_over, x0, y0, x1, y0, TRIM)            # gold neckband (atarah) along the top edge
     # tzitzit: knots just under the hem and strands hanging below, at both corners of each face
     corner_cols = sorted({x0, min(x0 + 1, x1), max(x1 - 1, x0), x1})
     for x in corner_cols:
@@ -508,26 +520,59 @@ def split(img):
                 op[x, y] = OUT; bp[x, y] = CLEAR
     return base, over
 
+def shade_sprite(mask, light):
+    """Greyscale base layer for a mask, lit from the upper left so any dye keeps its volume."""
+    img = canvas(); px = img.load()
+    for (x, y) in mask:
+        v = max(196, min(252, int(light(x, y))))
+        px[x, y] = (v, v, v, 255)
+    return img
+
+def outline_of(mask):
+    over = canvas(); op = over.load()
+    for (x, y) in mask:
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            n = (x + dx, y + dy)
+            if n not in mask and 0 <= n[0] < 16 and 0 <= n[1] < 16:
+                op[n[0], n[1]] = OUT
+    return over
+
 def kippah_icon():
-    i = canvas(); blob(i, 8, 11, 6.6, 5.6, (238, 238, 242, 255))
-    px = i.load()
-    for y in range(12, 16):
-        for x in range(16): px[x, y] = CLEAR
-    base, over = split(i); bp = base.load(); op = over.load()
-    for x in range(16):
-        if bp[x, 11][3]:
-            op[x, 11] = TRIM; bp[x, 11] = CLEAR
-    for x in range(16):
-        if op[x, 11][3]: op[x, 12] = OUT
+    # a rounded skullcap seen from the side: dome above, flat gold rim below
+    mask = set()
+    for y in range(5, 11):
+        half = {5: 3, 6: 4, 7: 5, 8: 6, 9: 6, 10: 7}[y]
+        for x in range(8 - half, 8 + half):
+            mask.add((x, y))
+    rim = {(x, 11) for x in range(1, 15)}
+    base = shade_sprite(mask, lambda x, y: 252 - ((x - 5) ** 2 * 0.9 + (y - 6) ** 2 * 1.6) * 0.8)
+    over = outline_of(mask | rim)
+    op = over.load(); bp = base.load()
+    for (x, y) in rim:
+        op[x, y] = TRIM if x > 1 else (166, 128, 40, 255)
+    for x in range(2, 14, 3): op[x, 11] = (240, 204, 100, 255)   # a few brighter links in the rim
+    for x in range(2, 14): bp[x, 12] = CLEAR; op[x, 12] = OUT if op[x, 12][3] else CLEAR
+    for x in range(1, 15): op[x, 12] = OUT
+    op[0, 11] = OUT; op[15, 11] = OUT
+    for x in (6, 7): bp[x, 5] = (255, 255, 255, 255)             # specular nick on the crown
+    op[7, 4] = OUT; op[8, 4] = OUT
     return base, over
 
 def tallit_icon():
-    i = canvas(); outline_rect(i, 2, 2, 13, 13, (238, 238, 242, 255))
-    base, over = split(i); op = over.load()
-    for x in range(3, 13):
-        op[x, 8] = STRIPE; op[x, 10] = STRIPE
-    for x in (3, 4, 11, 12):                    # tassels hanging from the corners
-        op[x, 14] = KNOT; op[x, 15] = THREAD
+    # prayer shawl laid flat: neck notch at the top, two bands near the hem, tassels at the corners
+    mask = {(x, y) for x in range(2, 14) for y in range(2, 13)}
+    for x in range(6, 10):
+        for y in range(2, 4): mask.discard((x, y))
+    base = shade_sprite(mask, lambda x, y: 252 - (12 if x % 4 == 2 else 0) - (y - 2) * 1.2 - (x - 2) * 0.6)
+    over = outline_of(mask); op = over.load()
+    for x in range(2, 14):
+        op[x, 9] = STRIPE; op[x, 11] = STRIPE
+        if (x, 10) in mask: op[x, 10] = STRIPE
+    for x in (5, 6, 9, 10):                    # gold neckband around the notch
+        op[x, 4] = TRIM
+    op[6, 3] = TRIM; op[9, 3] = TRIM
+    for x in (2, 3, 12, 13):                   # tassels hanging from the corners
+        op[x, 13] = KNOT; op[x, 14] = THREAD; op[x, 15] = (214, 206, 188, 255)
     return base, over
 
 for name, fn in (("kippah", kippah_icon), ("tallit", tallit_icon)):
@@ -537,6 +582,13 @@ for name, fn in (("kippah", kippah_icon), ("tallit", tallit_icon)):
         json.dump({"parent": "minecraft:item/generated",
                    "textures": {"layer0": "shalomcraft:item/" + name,
                                 "layer1": "shalomcraft:item/" + name + "_overlay"}}, f, indent=2)
+
+# Accessories mod slots: bound purely through item tags, so nothing breaks if the mod is absent
+ACC_TAG = os.path.join(ROOT, "data", "accessories", "tags", "item")
+os.makedirs(ACC_TAG, exist_ok=True)
+for slot, item in (("hat", "shalomcraft:kippah"), ("cape", "shalomcraft:tallit")):
+    with open(os.path.join(ACC_TAG, slot + ".json"), "w") as f:
+        json.dump({"replace": False, "values": [item]}, f, indent=2)
 
 # allow dyeing in a crafting grid with any dye, same as leather armor
 with open(os.path.join(DYE_TAG, "dyeable.json"), "w") as f:

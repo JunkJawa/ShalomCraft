@@ -3,6 +3,10 @@
 Bump `mod_version` in `gradle.properties` for every release you hand to other people.
 Install the same version on the server and on every client.
 
+## 0.4.1
+- Kippah and tallit now fit Accessories slots: kippah in the Hat slot, tallit in the Cape slot. They still work as armor if you prefer. Note: the worn look in the Accessories slots uses the mod's default item rendering, so tell us how it looks and we will tune it
+- Visual polish: kippah and tallit icons redrawn with shading, gold rim and neckband, tassels. Worn textures gained cloth pleats, a gold neckband, a wide and thin stripe pair, and a gold crown button on the kippah
+
 ## 0.4.0
 - Fruit gems: sugar coated fruit jellies in six colours (cherry, orange, lemon, lime, blueberry, grape). 2 sugar and 1 matching dye make 4 gems. Eating one gives a random good effect
 - Dreidel: right click to spin it. It animates while spinning, then lands on nun, gimel, hay or shin and tells everyone nearby
