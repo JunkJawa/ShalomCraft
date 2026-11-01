@@ -46,6 +46,11 @@ public class ModItems {
         return ITEMS.registerSimpleItem(name, new Item.Properties());
     }
 
+    private static DeferredItem<Item> gem(String name) {
+        return ITEMS.register(name, () -> new FruitGemItem(new Item.Properties()
+                .food(food(1, 0.1f).fast().alwaysEdible().build())));
+    }
+
     private static DeferredItem<Item> edible(String name, FoodProperties.Builder food) {
         return ITEMS.registerSimpleItem(name, new Item.Properties().food(food.build()));
     }
@@ -99,6 +104,22 @@ public class ModItems {
             edible("bagel_with_lox_and_cream_cheese", food(11, 0.85f)
                     .effect(fdEffect("nourishment", 2400, MobEffects.SATURATION), 1.0f));
 
+    // Fruit gem candies, each eaten gives one random good effect
+    public static final DeferredItem<Item> FRUIT_GEM_RED = gem("fruit_gem_red");
+    public static final DeferredItem<Item> FRUIT_GEM_ORANGE = gem("fruit_gem_orange");
+    public static final DeferredItem<Item> FRUIT_GEM_YELLOW = gem("fruit_gem_yellow");
+    public static final DeferredItem<Item> FRUIT_GEM_GREEN = gem("fruit_gem_green");
+    public static final DeferredItem<Item> FRUIT_GEM_BLUE = gem("fruit_gem_blue");
+    public static final DeferredItem<Item> FRUIT_GEM_PURPLE = gem("fruit_gem_purple");
+
+    // Ritual objects
+    public static final DeferredItem<Item> DREIDEL = ITEMS.register("dreidel",
+            () -> new DreidelItem(new Item.Properties().stacksTo(1)));
+    public static final DeferredItem<Item> SHOFAR = ITEMS.register("shofar",
+            () -> new ShofarItem(new Item.Properties().stacksTo(1)));
+    public static final DeferredItem<Item> GOAT_HIDE = plain("goat_hide");
+    public static final DeferredItem<Item> PARCHMENT = plain("parchment");
+
     // Worn items: dyeable, no protection
     public static final DeferredItem<Item> KIPPAH = ITEMS.register("kippah",
             () -> new ArmorItem(ModArmorMaterials.CLOTH, ArmorItem.Type.HELMET, new Item.Properties().stacksTo(1)));
@@ -133,4 +154,8 @@ public class ModItems {
             ITEMS.registerSimpleBlockItem("gold_mezuzah", ModBlocks.GOLD_MEZUZAH);
     public static final DeferredItem<BlockItem> SILVER_MEZUZAH =
             ITEMS.registerSimpleBlockItem("silver_mezuzah", ModBlocks.SILVER_MEZUZAH);
+    public static final DeferredItem<BlockItem> NER_TAMID =
+            ITEMS.registerSimpleBlockItem("ner_tamid", ModBlocks.NER_TAMID);
+    public static final DeferredItem<BlockItem> TORAH =
+            ITEMS.registerSimpleBlockItem("torah", ModBlocks.TORAH);
 }

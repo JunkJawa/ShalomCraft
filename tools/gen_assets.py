@@ -780,3 +780,248 @@ write("gold_mezuzah", {"type": "minecraft:crafting_shapeless", "category": "misc
 write("silver_mezuzah", {"type": "minecraft:crafting_shapeless", "category": "misc",
       "ingredients": [SILVER_NUGGET] * 3 + [it("minecraft:paper"), it("minecraft:ink_sac")],
       "result": result("shalomcraft:silver_mezuzah", 1)})
+
+# ================= v0.4.0: fruit gems, dreidel, shofar, ner tamid, goat hide, parchment, Torah =================
+def item_model(name, textures=None, extra=None):
+    d = {"parent": "minecraft:item/generated", "textures": textures or {"layer0": "shalomcraft:item/" + name}}
+    if extra: d.update(extra)
+    with open(os.path.join(ASSETS, "models", "item", name + ".json"), "w") as f: json.dump(d, f, indent=2)
+
+def add_tag_values(path, values):
+    try:
+        with open(path) as f: j = json.load(f)
+    except FileNotFoundError:
+        j = {"replace": False, "values": []}
+    for v in values:
+        if v not in j["values"]: j["values"].append(v)
+    with open(path, "w") as f: json.dump(j, f, indent=2)
+
+lang = load_lang()
+
+# ---------- fruit gems: sugar coated jellies in six colours ----------
+GEM_COLORS = {"red": (222, 48, 66), "orange": (246, 140, 36), "yellow": (250, 218, 52),
+              "green": (88, 200, 70), "blue": (58, 128, 236), "purple": (158, 76, 214)}
+GEM_FLAVOR = {"red": "Cherry", "orange": "Orange", "yellow": "Lemon", "green": "Lime", "blue": "Blueberry", "purple": "Grape"}
+GEM_DYE = {"red": "red_dye", "orange": "orange_dye", "yellow": "yellow_dye", "green": "lime_dye",
+           "blue": "blue_dye", "purple": "purple_dye"}
+
+def gem_sprite(base):
+    img = canvas(); px = img.load()
+    shape = {(x, y) for y in range(6) for x in range(6) if (x, y) not in ((0, 0), (5, 0), (0, 5), (5, 5))}
+    dark = mix(base, 0.5)
+    def one(x0, y0):
+        for (x, y) in shape:
+            edge = any((x + dx, y + dy) not in shape for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+            if edge: c = dark
+            elif x + y <= 3: c = mix(base, 1.3)
+            elif x + y >= 7: c = mix(base, 0.8)
+            else: c = base
+            px[x0 + x, y0 + y] = c
+        px[x0 + 2, y0 + 2] = (255, 255, 255, 255)        # shine
+        px[x0 + 3, y0 + 4] = mix(base, 1.5)              # sugar crystal
+    one(2, 8); one(9, 8); one(5, 3)
+    return img
+
+for color, rgb in GEM_COLORS.items():
+    name = "fruit_gem_" + color
+    gem_sprite(rgb).save(os.path.join(TEX, name + ".png"))
+    item_model(name)
+    lang["item.shalomcraft." + name] = f"{GEM_FLAVOR[color]} Fruit Gem"
+    shapeless(name, ["minecraft:sugar", "minecraft:sugar", "minecraft:" + GEM_DYE[color]], name, 4, "food")
+lang["item.shalomcraft.fruit_gem.tooltip"] = "A sugar coated fruit jelly. Gives a random good effect."
+lang["item.shalomcraft.fruit_gem.effect"] = "Fruit gem surprise: %s"
+
+# ---------- dreidel: idle sprite plus four spin frames ----------
+GLYPHS = {
+    "nun":   [".###.", "...#.", "...#.", "####."],
+    "gimel": [".###.", "...#.", ".#.#.", ".#..#"],
+    "hay":   ["#####", "....#", "#...#", "#...#"],
+    "shin":  ["#.#.#", "#.#.#", "#.#.#", ".###."],
+}
+def dreidel_frame(w, glyph=None, light_left=True):
+    img = canvas(); px = img.load()
+    BLUE, BLUE_L, BLUE_D = (52, 92, 186), (104, 150, 232), (30, 56, 130)
+    WOOD, WOOD_D = (180, 124, 64), (132, 86, 40)
+    for y in range(1, 4):
+        px[7, y] = WOOD + (255,); px[8, y] = WOOD_D + (255,)
+    def row(y, ww):
+        x0 = 8 - ww // 2
+        for x in range(x0, x0 + ww):
+            t = (x - x0) / (ww - 1)
+            if not light_left: t = 1 - t
+            px[x, y] = (BLUE_L if t < 0.25 else (BLUE_D if t > 0.75 else BLUE)) + (255,)
+    for y in range(4, 10): row(y, w)
+    for k, y in enumerate(range(10, 14)): row(y, max(2, w - 2 * (k + 1)))
+    if glyph:
+        for ry, line in enumerate(GLYPHS[glyph]):
+            for rx, ch in enumerate(line):
+                if ch == "#": px[6 + rx, 5 + ry] = (252, 214, 96, 255)
+    return outline_pixels(img)
+
+dreidel_frame(10, "nun").save(os.path.join(TEX, "dreidel.png"))
+frames = [dreidel_frame(10, "shin"), dreidel_frame(6, None, True), dreidel_frame(2, None, True), dreidel_frame(6, None, False)]
+for i, fr in enumerate(frames):
+    fr.save(os.path.join(TEX, f"dreidel_spin_{i}.png"))
+    item_model(f"dreidel_spin_{i}")
+item_model("dreidel", extra={"overrides": [
+    {"predicate": {"shalomcraft:spin": v}, "model": f"shalomcraft:item/dreidel_spin_{i}"}
+    for i, v in enumerate((0.1, 0.3, 0.5, 0.7))]})
+lang["item.shalomcraft.dreidel"] = "Dreidel"
+lang["item.shalomcraft.dreidel.tooltip"] = "Right click to spin."
+lang["item.shalomcraft.dreidel.nun"] = "%s's dreidel lands on נ Nun. Nothing happens."
+lang["item.shalomcraft.dreidel.gimel"] = "%s's dreidel lands on ג Gimel. Take the whole pot!"
+lang["item.shalomcraft.dreidel.hay"] = "%s's dreidel lands on ה Hay. Take half the pot."
+lang["item.shalomcraft.dreidel.shin"] = "%s's dreidel lands on ש Shin. Put one in."
+for k, v in (("nun", "נ Nun"), ("gimel", "ג Gimel"), ("hay", "ה Hay"), ("shin", "ש Shin")):
+    lang["item.shalomcraft.dreidel.letter." + k] = v
+write("dreidel", {"type": "minecraft:crafting_shaped", "category": "misc",
+                  "pattern": [" S ", "PPP", " P "],
+                  "key": {"S": it("minecraft:stick"), "P": {"tag": "minecraft:planks"}},
+                  "result": result("shalomcraft:dreidel", 1)})
+
+# ---------- shofar: a curved horn ----------
+def shofar_sprite():
+    img = canvas(); px = img.load()
+    P0, P1, P2 = (13.0, 2.0), (1.5, 3.2), (3.4, 13.4)
+    cell = {}
+    for i in range(401):
+        t = i / 400
+        x = (1 - t) ** 2 * P0[0] + 2 * (1 - t) * t * P1[0] + t * t * P2[0]
+        y = (1 - t) ** 2 * P0[1] + 2 * (1 - t) * t * P1[1] + t * t * P2[1]
+        r = 0.95 + 2.2 * t
+        for yy in range(16):
+            for xx in range(16):
+                if (xx + .5 - x) ** 2 + (yy + .5 - y) ** 2 <= r * r:
+                    cell[(xx, yy)] = (t, x, y, r)
+    for (xx, yy), (t, x, y, r) in cell.items():
+        base = (150, 108, 62) if t < 0.14 else (226, 198, 150)           # darker mouthpiece, pale horn
+        c = mix(base, 1.0)
+        if int(t * 11) % 3 == 0 and t > 0.2: c = mix(base, 0.84)          # growth rings
+        if (xx + .5 - x) + (yy + .5 - y) < -r * 0.35: c = mix(base, 1.14)
+        elif (xx + .5 - x) + (yy + .5 - y) > r * 0.45: c = mix(base, 0.78)
+        px[xx, yy] = c
+    return outline_pixels(img)
+shofar_sprite().save(os.path.join(TEX, "shofar.png")); item_model("shofar")
+lang["item.shalomcraft.shofar"] = "Shofar"
+lang["subtitles.shalomcraft.shofar"] = "Shofar blasts"
+with open(os.path.join(ASSETS, "sounds.json"), "w") as f:
+    json.dump({"shofar": {"subtitle": "subtitles.shalomcraft.shofar",
+                          "sounds": [{"name": "shalomcraft:shofar", "stream": False}]}}, f, indent=2)
+add_tag_values(os.path.join(ITEM_TAGS, "shofar_horns.json"), ["minecraft:goat_horn"])
+write("shofar", {"type": "minecraft:crafting_shapeless", "category": "misc",
+                 "ingredients": [{"tag": "shalomcraft:shofar_horns"}, it("minecraft:leather")],
+                 "result": result("shalomcraft:shofar", 1)})
+
+# ---------- goat hide and parchment ----------
+def goat_hide():
+    img = canvas(); FUR = (158, 134, 108, 255)
+    blob(img, 8, 8, 5.2, 4.4, FUR)
+    for cx, cy in ((3.6, 3.6), (12.4, 3.6), (3.6, 12.4), (12.4, 12.4)):
+        blob(img, cx, cy, 2.3, 2.3, FUR)
+    blob(img, 8, 3.2, 2.6, 2.1, FUR)
+    dots(img, [(6, 6), (9, 7), (7, 9), (10, 10), (5, 8), (11, 6)], mix(FUR, 0.78))
+    dots(img, [(7, 5), (10, 8), (6, 10), (9, 5), (8, 7)], mix(FUR, 1.2))
+    return img
+goat_hide().save(os.path.join(TEX, "goat_hide.png")); item_model("goat_hide")
+
+def parchment_sprite():
+    img = canvas(); PAR = (238, 224, 184, 255)
+    outline_rect(img, 3, 1, 12, 14, PAR)
+    rect(img, 4, 2, 11, 3, (214, 192, 144, 255))
+    ink = (84, 62, 42, 255)
+    for y in (6, 8, 10, 12):
+        for x in (5, 6, 8, 9, 10): img.putpixel((x, y), ink)
+    return img
+parchment_sprite().save(os.path.join(TEX, "parchment.png")); item_model("parchment")
+lang["item.shalomcraft.goat_hide"] = "Goat Hide"
+lang["item.shalomcraft.parchment"] = "Parchment"
+lang["message.shalomcraft.goat_hide_growing"] = "This goat's hide is still growing back."
+cook("parchment", "shalomcraft:goat_hide", "parchment", 0.3)
+
+# ---------- Torah scroll: inventory icon, block model, recipe ----------
+def torah_icon():
+    img = canvas(); WOOD, GOLD = (168, 110, 54, 255), (232, 184, 60, 255)
+    PAR, INK = (240, 226, 186, 255), (70, 52, 36, 255)
+    rect(img, 2, 2, 3, 13, WOOD); rect(img, 12, 2, 13, 13, WOOD)
+    rect(img, 1, 1, 4, 1, GOLD); rect(img, 1, 14, 4, 14, GOLD)
+    rect(img, 11, 1, 14, 1, GOLD); rect(img, 11, 14, 14, 14, GOLD)
+    rect(img, 4, 3, 11, 12, PAR)
+    for y in (4, 6, 8, 10):
+        for x in (5, 6, 8, 9, 10): img.putpixel((x, y), INK)
+    return outline_pixels(img)
+torah_icon().save(os.path.join(TEX, "torah.png")); item_model("torah")
+
+tt = Image.new("RGBA", (16, 16))
+for y in range(16):
+    for x in range(16):
+        if y < 8 and x < 8: c = (150, 98, 48, 255) if y % 2 == 0 else (118, 72, 34, 255)         # wood grain
+        elif y < 8: c = (238, 224, 184, 255) if (x + y) % 5 else (226, 210, 168, 255)            # parchment
+        else:
+            c = (238, 224, 184, 255)
+            if y % 2 == 1 and 1 <= y - 8 <= 6 and (x % 3) != 2: c = (84, 62, 42, 255)           # lines of text
+        tt.putpixel((x, y), c)
+tt.save(os.path.join(ASSETS, "textures", "block", "torah.png"))
+WOOD_UV, PAR_UV, TEXT_UV = [0, 0, 8, 8], [8, 0, 16, 8], [0, 8, 16, 16]
+def cube2(frm, to, side_uv, up_uv=None):
+    f = {d: {"uv": side_uv, "texture": "#0"} for d in ("north", "east", "south", "west", "down")}
+    f["up"] = {"uv": up_uv or side_uv, "texture": "#0"}
+    return {"from": frm, "to": to, "faces": f}
+write_model("torah", {"parent": "minecraft:block/block",
+    "textures": {"0": "shalomcraft:block/torah", "particle": "shalomcraft:block/torah"},
+    "elements": [cube2([1, 0, 3], [3, 3, 13], WOOD_UV), cube2([3, 0, 3.5], [5, 2.2, 12.5], PAR_UV),
+                 cube2([5, 0, 4], [11, 0.6, 12], PAR_UV, TEXT_UV), cube2([11, 0, 3.5], [13, 2.2, 12.5], PAR_UV),
+                 cube2([13, 0, 3], [15, 3, 13], WOOD_UV)]})
+with open(os.path.join(ASSETS, "blockstates", "torah.json"), "w") as f:
+    json.dump({"variants": {f"facing={fc}": rot("shalomcraft:block/torah", fc) for fc in YROT}}, f, indent=2)
+lang["block.shalomcraft.torah"] = "Torah Scroll"
+write("torah", {"type": "minecraft:crafting_shapeless", "category": "misc",
+                "ingredients": [it("shalomcraft:parchment")] * 2 + [it("minecraft:stick")] * 2
+                               + [it("minecraft:ink_sac"), it("minecraft:string")],
+                "result": result("shalomcraft:torah", 1)})
+
+# ---------- ner tamid: hanging eternal light ----------
+nt = Image.new("RGBA", (16, 16))
+for y in range(16):
+    for x in range(16):
+        if y < 8 and x < 8: c = gold[(x + y * 2) % 4] + (255,)
+        elif y < 8:
+            c = (206, 36, 48, 205) if (x + y) % 4 else (238, 96, 104, 215)                       # red glass
+        elif x < 8: c = (255, 244, 170, 255) if y < 10 else ((255, 178, 46, 255) if y < 13 else (232, 96, 24, 255))
+        else: c = (104, 90, 64, 255) if (x + y) % 2 else (132, 116, 82, 255)                      # chain links
+        nt.putpixel((x, y), c)
+nt.save(os.path.join(ASSETS, "textures", "block", "ner_tamid.png"))
+NT_GOLD, NT_GLASS, NT_FLAME, NT_CHAIN = [0, 0, 8, 8], [8, 0, 16, 8], [0, 8, 8, 16], [8, 8, 16, 16]
+def nt_cube(frm, to, uv, **extra):
+    d = {"from": frm, "to": to, "faces": {s: {"uv": uv, "texture": "#0"} for s in ("north", "east", "south", "west", "up", "down")}}
+    d.update(extra); return d
+write_model("ner_tamid", {"parent": "minecraft:block/block", "render_type": "minecraft:translucent",
+    "textures": {"0": "shalomcraft:block/ner_tamid", "particle": "shalomcraft:block/ner_tamid"},
+    "elements": [nt_cube([5.5, 15, 5.5], [10.5, 16, 10.5], NT_GOLD),
+                 nt_cube([7.5, 11, 7.5], [8.5, 15, 8.5], NT_CHAIN),
+                 nt_cube([5, 10, 5], [11, 11, 11], NT_GOLD),
+                 nt_cube([5.5, 3, 5.5], [10.5, 10, 10.5], NT_GLASS),
+                 nt_cube([7, 4, 7], [9, 8.5, 9], NT_FLAME, shade=False,
+                         neoforge_data={"block_light": 15, "sky_light": 15, "ambient_occlusion": False}),
+                 nt_cube([6, 2, 6], [10, 3, 10], NT_GOLD),
+                 nt_cube([7, 0, 7], [9, 2, 9], NT_GOLD)]})
+with open(os.path.join(ASSETS, "blockstates", "ner_tamid.json"), "w") as f:
+    json.dump({"variants": {"": {"model": "shalomcraft:block/ner_tamid"}}}, f, indent=2)
+with open(os.path.join(ASSETS, "models", "item", "ner_tamid.json"), "w") as f:
+    json.dump({"parent": "shalomcraft:block/ner_tamid"}, f, indent=2)
+lang["block.shalomcraft.ner_tamid"] = "Ner Tamid"
+write("ner_tamid", {"type": "minecraft:crafting_shaped", "category": "misc",
+                    "pattern": [" C ", "GRG", " T "],
+                    "key": {"C": it("minecraft:chain"), "G": it("minecraft:gold_ingot"),
+                            "R": it("minecraft:red_stained_glass"), "T": it("minecraft:torch")},
+                    "result": result("shalomcraft:ner_tamid", 1)})
+
+# ---------- loot tables and tags for the new blocks ----------
+for block in ("ner_tamid", "torah"):
+    with open(os.path.join(LOOT, block + ".json"), "w") as f:
+        json.dump({"type": "minecraft:block", "random_sequence": "shalomcraft:blocks/" + block,
+                   "pools": [{"rolls": 1.0, "bonus_rolls": 0.0,
+                              "conditions": [{"condition": "minecraft:survives_explosion"}],
+                              "entries": [{"type": "minecraft:item", "name": "shalomcraft:" + block}]}]}, f, indent=2)
+add_tag_values(os.path.join(TAGS, "pickaxe.json"), ["shalomcraft:ner_tamid"])
+save_lang(lang)
+print("v0.4.0 assets done")

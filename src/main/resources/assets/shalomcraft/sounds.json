@@ -1,0 +1,11 @@
+{
+  "shofar": {
+    "subtitle": "subtitles.shalomcraft.shofar",
+    "sounds": [
+      {
+        "name": "shalomcraft:shofar",
+        "stream": false
+      }
+    ]
+  }
+}

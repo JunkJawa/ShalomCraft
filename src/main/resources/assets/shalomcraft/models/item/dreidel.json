@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "shalomcraft:item/dreidel"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "shalomcraft:spin": 0.1
+      },
+      "model": "shalomcraft:item/dreidel_spin_0"
+    },
+    {
+      "predicate": {
+        "shalomcraft:spin": 0.3
+      },
+      "model": "shalomcraft:item/dreidel_spin_1"
+    },
+    {
+      "predicate": {
+        "shalomcraft:spin": 0.5
+      },
+      "model": "shalomcraft:item/dreidel_spin_2"
+    },
+    {
+      "predicate": {
+        "shalomcraft:spin": 0.7
+      },
+      "model": "shalomcraft:item/dreidel_spin_3"
+    }
+  ]
+}

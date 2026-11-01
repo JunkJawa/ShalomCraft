@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smoking",
+  "category": "food",
+  "ingredient": {
+    "item": "shalomcraft:goat_hide"
+  },
+  "result": {
+    "id": "shalomcraft:parchment"
+  },
+  "experience": 0.3,
+  "cookingtime": 100
+}

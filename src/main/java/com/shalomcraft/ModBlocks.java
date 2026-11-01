@@ -31,4 +31,10 @@ public class ModBlocks {
             () -> new MezuzahBlock(wallPiece()));
     public static final DeferredBlock<Block> SILVER_MEZUZAH = BLOCKS.register("silver_mezuzah",
             () -> new MezuzahBlock(wallPiece()));
+
+    public static final DeferredBlock<Block> NER_TAMID = BLOCKS.register("ner_tamid",
+            () -> new NerTamidBlock(metal().lightLevel(state -> 13)));
+
+    public static final DeferredBlock<Block> TORAH = BLOCKS.register("torah",
+            () -> new TorahBlock(BlockBehaviour.Properties.of().strength(0.4f).sound(SoundType.WOOL).noOcclusion()));
 }
